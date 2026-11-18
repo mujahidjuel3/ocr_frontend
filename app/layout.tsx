@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Source_Sans_3, Source_Serif_4 } from "next/font/google";
+import { Source_Sans_3 } from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
@@ -7,12 +7,6 @@ const sans = Source_Sans_3({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-sans",
-});
-
-const serif = Source_Serif_4({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-serif",
 });
 
 export const metadata: Metadata = {
@@ -29,7 +23,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${sans.variable} ${serif.variable}`}>
+    <html lang="en" className={sans.variable}>
       <body className="bg-shohoz-mist font-sans text-shohoz-ink antialiased">
         <a
           href="#content"

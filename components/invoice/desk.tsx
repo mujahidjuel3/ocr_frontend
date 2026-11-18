@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
 import {
   ApiError,
+  apiOrigin,
   approveInvoice,
   createProduct,
   createSupplier,
@@ -32,7 +33,6 @@ import {
   type Product,
   type Supplier,
 } from "@/lib/api";
-import { apiOrigin } from "@/lib/api";
 import { classifyDue, dueLabel, isActionableDue, type DueBucket } from "@/lib/due";
 import { headerReviewFields, lineItemsMessage, lineItemsNeedReview, reviewReasonLabel } from "@/lib/line-review";
 import { sectionFromPath } from "@/lib/navigation";
@@ -566,7 +566,7 @@ function Overview({ loading, summary, recent, activity, failedJobs, duplicateWar
         </Panel>
         <Panel title="Recent processing">
           {activity.length === 0 ? <Empty>No processing jobs yet.</Empty> : (
-            <ul className="space-y-2 text-sm">{activity.map((job) => <li key={job.id} className="flex justify-between gap-3"><span>{labelStatus(job.status)}</span><span className="text-shohoz-muted">{job.durationMs != null ? `${job.durationMs} ms` : job.error || ""}</span></li>)}</ul>
+            <ul className="space-y-2 text-sm">{activity.map((job) => <li key={job.id} className="flex justify-between gap-3"><span>{workflowLabel(job.status)}</span><span className="text-shohoz-muted">{job.durationMs != null ? `${job.durationMs} ms` : job.error || ""}</span></li>)}</ul>
           )}
         </Panel>
       </div>
@@ -1105,10 +1105,6 @@ function emptyDraftItem(rowKey = nextDraftKey()): DraftItem {
 function text(value: string): string | undefined {
   const trimmed = value.trim();
   return trimmed ? trimmed : undefined;
-}
-
-function labelStatus(status: string): string {
-  return status.replaceAll("_", " ");
 }
 
 function formatBytes(size: number): string {

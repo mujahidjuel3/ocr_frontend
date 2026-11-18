@@ -1,13 +1,9 @@
 import { ApiError, apiBaseUrl, errorMessage } from "./api-core";
-import { clearAccessToken, readAccessToken, writeAccessToken } from "./auth/session";
+import { clearAccessToken, readAccessToken } from "./auth/session";
 import { filenameFromDisposition } from "./download";
 import { uploadLanguage } from "./ocr-language";
 
 export { ApiError };
-export { clearAccessToken as clearToken, readAccessToken as readToken, writeAccessToken as saveToken };
-
-const TOKEN_KEY = "shohoz.accessToken";
-void TOKEN_KEY;
 
 export type AuthUser = { id: string; email: string; name: string; tenantId: string; tenantName: string };
 export type AuthResponse = { accessToken: string; user: AuthUser };

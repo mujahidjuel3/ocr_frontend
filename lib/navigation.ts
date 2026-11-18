@@ -12,26 +12,17 @@ export type NavItem = {
   id: AppSection;
   href: string;
   label: string;
-  /** When false, the item is shown but marked unavailable. */
-  available: boolean;
-  note?: string;
 };
 
 export const APP_NAV: NavItem[] = [
-  { id: "dashboard", href: "/dashboard", label: "Dashboard", available: true },
-  { id: "upload", href: "/upload", label: "Invoice Upload", available: true },
-  { id: "review", href: "/review", label: "Invoice Review", available: true },
-  { id: "archive", href: "/invoices", label: "Invoice Archive", available: true },
-  { id: "suppliers", href: "/suppliers", label: "Suppliers", available: true },
-  { id: "products", href: "/products", label: "Products", available: true },
-  {
-    id: "due",
-    href: "/due",
-    label: "Due & Overdue",
-    available: true,
-    note: "Uses invoice due dates from the archive API. Reminder delivery is not available yet.",
-  },
-  { id: "settings", href: "/settings", label: "Settings", available: true },
+  { id: "dashboard", href: "/dashboard", label: "Dashboard" },
+  { id: "upload", href: "/upload", label: "Invoice Upload" },
+  { id: "review", href: "/review", label: "Invoice Review" },
+  { id: "archive", href: "/invoices", label: "Invoice Archive" },
+  { id: "suppliers", href: "/suppliers", label: "Suppliers" },
+  { id: "products", href: "/products", label: "Products" },
+  { id: "due", href: "/due", label: "Due & Overdue" },
+  { id: "settings", href: "/settings", label: "Settings" },
 ];
 
 export function sectionFromPath(pathname: string): AppSection {
@@ -45,8 +36,4 @@ export function sectionFromPath(pathname: string): AppSection {
   if (path.startsWith("/due")) return "due";
   if (path.startsWith("/settings") || path.startsWith("/account")) return "settings";
   return "dashboard";
-}
-
-export function hrefForSection(section: AppSection): string {
-  return APP_NAV.find((item) => item.id === section)?.href ?? "/dashboard";
 }
