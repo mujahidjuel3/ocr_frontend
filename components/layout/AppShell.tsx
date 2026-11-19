@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { isAuthDisabled } from "@/lib/auth/flags";
 import { APP_NAV, sectionFromPath } from "@/lib/navigation";
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -11,6 +12,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const active = sectionFromPath(pathname);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const openDemo = isAuthDisabled();
 
   return (
     <div className="min-h-screen bg-shohoz-mist lg:grid lg:grid-cols-[15.5rem_1fr]">
@@ -37,9 +39,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="border-t border-shohoz-line p-4 text-sm">
           <p className="font-medium text-shohoz-ink">{user?.name || "—"}</p>
           <p className="text-shohoz-muted">{tenantName || "—"}</p>
-          <button type="button" className="mt-3 text-sm font-semibold text-shohoz" onClick={logout}>
-            Sign out
-          </button>
+          {!openDemo ? (
+            <button type="button" className="mt-3 text-sm font-semibold text-shohoz" onClick={logout}>
+              Sign out
+            </button>
+          ) : null}
         </div>
       </aside>
 
@@ -60,9 +64,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               >
                 Menu
               </button>
-              <button type="button" className="hidden rounded-md px-3 py-2 text-sm font-semibold text-shohoz sm:inline lg:hidden" onClick={logout}>
-                Sign out
-              </button>
+              {!openDemo ? (
+                <button type="button" className="hidden rounded-md px-3 py-2 text-sm font-semibold text-shohoz sm:inline lg:hidden" onClick={logout}>
+                  Sign out
+                </button>
+              ) : null}
             </div>
           </div>
           {mobileOpen ? (

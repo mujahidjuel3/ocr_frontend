@@ -14,6 +14,7 @@ import {
   type MeResponse,
 } from "@/lib/api";
 import { classifyAuthFailure } from "@/lib/auth/errors";
+import { isAuthDisabled } from "@/lib/auth/flags";
 import { clearAccessToken, readAccessToken, safeReturnPath, subscribeAuthBroadcast, writeAccessToken } from "@/lib/auth/session";
 
 export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
@@ -61,6 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const goToLogin = useCallback((nextPath?: string) => {
+    // Login temporarily disabled for open demo.
+    if (isAuthDisabled()) {
+      router.replace("/dashboard");
+      return;
+    }
     if (redirecting.current) return;
     const onAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
     if (onAuthPage) return;
@@ -73,8 +79,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [pathname, router]);
 
   const refreshSession = useCallback(async (): Promise<boolean> => {
+    const openDemo = isAuthDisabled();
     const token = readAccessToken();
-    if (!token) {
+    if (!token && !openDemo) {
       setUser(null);
       setStatus("unauthenticated");
       return false;
@@ -91,6 +98,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setStatus((current) => (current === "authenticated" ? "authenticated" : "loading"));
         return false;
       }
+      if (openDemo) {
+        setError(reason instanceof ApiError ? reason.message : "Could not open the demo workspace");
+        setStatus("loading");
+        return false;
+      }
       if (reason instanceof ApiError && reason.status === 401) {
         clearSession("expired");
         return false;
@@ -102,6 +114,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setUnauthorizedHandler(() => {
+      if (isAuthDisabled()) {
+        setError("The invoice service rejected the open-demo session. Check AUTH_DISABLED on the API.");
+        setStatus("loading");
+        return;
+      }
       setUser(null);
       setStatus("unauthenticated");
       goToLogin();
@@ -112,8 +129,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let ignore = false;
     (async () => {
+      const openDemo = isAuthDisabled();
       const token = readAccessToken();
-      if (!token) {
+      if (!token && !openDemo) {
         if (!ignore) {
           setStatus("unauthenticated");
           setUser(null);
@@ -121,6 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       try {
+        // Open demo: backend AUTH_DISABLED injects the seed tenant without a JWT.
         const profile = await me();
         if (ignore) return;
         setUser(toAuthUser(profile));
@@ -131,6 +150,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (reason instanceof ApiError && reason.status === 0) {
           // Token exists but API unreachable — stay loading so protected UI does not flash.
           setError("The invoice service could not be reached. Retrying session restore…");
+          setStatus("loading");
+          return;
+        }
+        if (openDemo) {
+          setError(reason instanceof ApiError ? reason.message : "Could not open the demo workspace");
           setStatus("loading");
           return;
         }
@@ -192,6 +216,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
+    // Login temporarily disabled — stay on dashboard in open demo.
+    if (isAuthDisabled()) {
+      router.replace("/dashboard");
+      return;
+    }
     clearSession("logout");
     setError("");
     router.replace("/login");
